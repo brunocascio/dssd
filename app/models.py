@@ -20,7 +20,7 @@ class Product(models.Model):
   name = models.CharField(max_length=100)
   costprice = models.IntegerField()
   saleprice = models.IntegerField()
-  producttype = models.ForeignKey(ProductType)
+  producttype = models.ForeignKey(ProductType, on_delete='CASCADE')
 
   class Meta:
     db_table = "product"
