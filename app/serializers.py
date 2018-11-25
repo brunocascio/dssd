@@ -7,6 +7,8 @@ class ProductTypeSerializer(serializers.ModelSerializer):
     fields = ('id', 'initials', 'description')
 
 class ProductSerializer(serializers.ModelSerializer):
+  producttype = ProductTypeSerializer(many=False, read_only=True)
+  
   class Meta:
     model = Product
     fields = ('id', 'name', 'costprice', 'saleprice', 'producttype', 'stock')

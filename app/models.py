@@ -13,7 +13,7 @@ class ProductType(models.Model):
     db_table = "producttype"
 
   def __unicode__(self):
-    return u"%s" % self.description
+    return u"%s" % self.initials
 
 
 class Product(models.Model):
