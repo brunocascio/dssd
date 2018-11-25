@@ -20,6 +20,7 @@ class Product(models.Model):
   name = models.CharField(max_length=100)
   costprice = models.IntegerField()
   saleprice = models.IntegerField()
+  stock = models.IntegerField(default=0)
   producttype = models.ForeignKey(ProductType, on_delete='CASCADE')
 
   class Meta:
