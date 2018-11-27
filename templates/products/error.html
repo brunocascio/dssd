@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card-deck justify-content-center">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Error realizando la compra</h5>
+          <pre>{{ case }}</pre>
+          <a href="{% url 'products' %}">Volver</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

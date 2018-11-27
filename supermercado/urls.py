@@ -25,7 +25,7 @@ router.register(r'products', ProductViewSet)
 router.register(r'product-types', ProductTypeViewSet)
 
 urlpatterns = [
-    url(r'^site/products/buy$', productBuy, name='products'),
+    url(r'^site/products/buy$', productBuy, name='productBuy'),
     url(r'^site/products/$', productsList, name='products'),
     path('accounts/', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),

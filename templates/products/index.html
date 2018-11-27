@@ -11,9 +11,11 @@
           <p class="card-text">
             $ {{ product.saleprice }}
           </p>
-          <form>
+          <form method="post" action="{% url 'productBuy' %}">
+            {% csrf_token %}
+            <input type="hidden" value="{{ product.id }}" name="product_id" />
             <div class="form-group">
-              <input type="text" class="form-control" placeholder="Ingrese cupón (Opcional)">
+              <input type="text" name="coupon" class="form-control" placeholder="Ingrese cupón (Opcional)">
             </div>
             <button type="submit" class="btn btn-primary">Comprar</button>
           </form>
