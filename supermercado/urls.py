@@ -18,13 +18,15 @@ from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
-from app.views import productsList, ProductViewSet, ProductTypeViewSet, productBuy
+from app.views import productsList, ProductViewSet, SaleTypeViewSet, ProductTypeViewSet, productBuy, productBuyConfirm
 
 router = routers.DefaultRouter()
 router.register(r'products', ProductViewSet)
 router.register(r'product-types', ProductTypeViewSet)
+router.register(r'sales', SaleTypeViewSet)
 
 urlpatterns = [
+    url(r'^site/products/buy/confirm$', productBuyConfirm, name='productBuyConfirm'),
     url(r'^site/products/buy$', productBuy, name='productBuy'),
     url(r'^site/products/$', productsList, name='products'),
     path('accounts/', include('django.contrib.auth.urls')),

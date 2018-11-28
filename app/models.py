@@ -28,3 +28,15 @@ class Product(models.Model):
 
   def __unicode__(self):
     return u"%s" % self.name
+
+
+class Sale(models.Model):
+  amount = models.CharField(max_length=100)
+  product_id = models.ForeignKey(Product, on_delete='RESTRICT')
+  email = models.CharField(max_length=100)
+
+  class Meta:
+    db_table = "sale"
+
+  def __unicode__(self):
+    return u"venta: %d, email: %s" % self.id, self.email

@@ -2,13 +2,11 @@
 
 {% block content %}
   <div class="card-deck justify-content-center">
-    <div class="col-md-12">
+    <div class="col-md-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Error realizando la compra</h5>
-          <pre>{{ case }}</pre>
-          <pre>{{ error }}</pre>
-          <a href="{% url 'products' %}">Volver</a>
+          <h1>La compra ha sido exitosa!</h1>
+          <a href="{% url 'products' %}">Seguir Comprando</a>
         </div>
       </div>
     </div>
