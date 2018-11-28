@@ -2,7 +2,7 @@
 
 Tener instalado `python` y `pip`.
 
-`sudo pip install django djangorestframework`
+`pip install -r requirements.txt`
 
 ## Crear migraciones
 
