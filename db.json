@@ -1,0 +1,93 @@
+[
+    {
+        "model": "app.producttype",
+        "pk": 43,
+        "fields": {
+            "initials": "CO",
+            "description": "COMIDA"
+        }
+    },
+    {
+        "model": "app.producttype",
+        "pk": 44,
+        "fields": {
+            "initials": "ELECT",
+            "description": "ELECTRONICA"
+        }
+    },
+    {
+        "model": "app.producttype",
+        "pk": 45,
+        "fields": {
+            "initials": "OTRO",
+            "description": "OTROS"
+        }
+    },
+    {
+        "model": "app.product",
+        "pk": 45,
+        "fields": {
+            "name": "Computadora",
+            "costprice": 10000,
+            "saleprice": 20000,
+            "stock": 5,
+            "producttype": 44
+        }
+    },
+    {
+        "model": "app.product",
+        "pk": 46,
+        "fields": {
+            "name": "Sandwich",
+            "costprice": 20,
+            "saleprice": 30,
+            "stock": 3,
+            "producttype": 43
+        }
+    },
+    {
+        "model": "app.product",
+        "pk": 47,
+        "fields": {
+            "name": "Mesa",
+            "costprice": 600,
+            "saleprice": 700,
+            "stock": 1,
+            "producttype": 45
+        }
+    },
+    {
+        "model": "auth.user",
+        "fields": {
+            "password": "pbkdf2_sha256$120000$g8a7F2s793rk$RWvi6YhrMU3+GcybFABBrN5oQs5odsRiyDYXFJvFdaA=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "empleado@example.com",
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2018-11-28T21:05:30.058Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "fields": {
+            "password": "pbkdf2_sha256$120000$MJQ5o2KvKvyL$jifAFhEQDvEbaWdn2I3slSsmZiFyuqZPvDfF63qB44I=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "noempleado@example.com",
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2018-11-28T21:05:51.728Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    }
+]
