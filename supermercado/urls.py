@@ -31,6 +31,5 @@ urlpatterns = [
     url(r'^site/products/$', productsList, name='products'),
     path('accounts/', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^', include(router.urls)),
-    url(r'^', include('django.contrib.auth.urls')),
+    url(r'^', include(router.urls))
 ]

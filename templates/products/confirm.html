@@ -6,17 +6,27 @@
       <div class="card">
         <div class="card-body">
           <h1>{{ product.name }}</h1>
-          <p>Es electrónico: {% if product.es_electro %}SI{% else %}NO{% endif %}</p>
-          <p>Descuento por empleado: {% if product.es_empleado %}SI{% else %}NO{% endif %}</p>
-          <p>Precio Final: {{ product.precio_venta }}</p>
-          {% if product.cupon.len %}
+          {% if not product.es_empleado %}
+            <p>Es electrónico: {% if product.es_electro %}SI{% else %}NO{% endif %}</p>
+          {% else %}
+            <p>Descuento por empleado: {% if product.es_empleado %}SI{% else %}NO{% endif %}</p>
+          {% endif %}
+          {% if product.cupon|length > 0 %}
             {% if product.cupon_valido %}
               <p>Cupón: {{ product.cupon }}</p>
-              <p>Descuento Cupón: {{ product.cupon_descuento }}</p>
             {% else %}
-              <p>El cupón provisto es inválido, esto impactará en el precio de venta donde no se aplicará el descuento de tal cupón</p>
+              {% if product.es_empleado %}
+                <div class="alert alert-danger" role="alert">
+                  <p>El cupón provisto no puede aplicarse, porque usted ya es empleado.</p>
+                </div>
+              {% else %}
+                <div class="alert alert-danger" role="alert">
+                  <p>El cupón provisto es inválido, esto impactará en el precio de venta donde no se aplicará el descuento de tal cupón.</p>
+                </div>
+              {% endif %}
             {% endif %}
           {% endif %}
+          <p>Precio Final: {{ product.precio_venta }}</p>
           <form method="post" action="{% url 'productBuyConfirm' %}">
             {% csrf_token %}
             <input type="hidden" value="{{ product.case_id }}" name="case_id" />
