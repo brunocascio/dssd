@@ -15,6 +15,10 @@ import json
 from pprint import pprint
 from app.helpers import parseBonitaProduct
 
+
+class CaseNotFoundException(Exception):
+  pass
+
 # Create your views here.
 
 class ProductTypeViewSet(viewsets.ModelViewSet):
@@ -145,6 +149,14 @@ def productBuyConfirm(request):
       'case_id': caseId
     }
 
+    pprint(variables)
+
+    if ('cause' in variables):
+      if "not found" in variables['cause']['message'].lower():
+        raise CaseNotFoundException('La compra ha expirado.')
+      else:
+        raise Exception(variables['cause']['message'])
+
     parseBonitaProduct(variables, productInstance)
 
     pprint(productInstance)
@@ -184,5 +196,8 @@ def productBuyConfirm(request):
 
     return render(request, 'products/sale-ok.html', { 'sale': sale })
 
-  except Exception as e:
+  except CaseNotFoundException as e:
     return render(request, 'products/error.html', { 'error': str(e) })
+  except Exception as e:
+    raise e
+    # return render(request, 'products/error.html', { 'error': str(e) })
