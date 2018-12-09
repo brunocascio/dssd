@@ -18,7 +18,7 @@ from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
-from app.views import productsList, ProductViewSet, SaleTypeViewSet, ProductTypeViewSet, productBuy, productBuyConfirm
+from app.views import cart, productsList, ProductViewSet, SaleTypeViewSet, ProductTypeViewSet, productBuy, productBuyConfirm
 
 router = routers.DefaultRouter()
 router.register(r'products', ProductViewSet)
@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^site/products/buy/confirm$', productBuyConfirm, name='productBuyConfirm'),
     url(r'^site/products/buy$', productBuy, name='productBuy'),
     url(r'^site/products/$', productsList, name='products'),
+    url(r'^site/cart/$', cart, name='cart'),
     path('accounts/', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include(router.urls))

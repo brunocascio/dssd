@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <table class="table table-bordered">
+    <thead>
+      <th>Producto</th>
+      <th>Monto</th>
+      <th>Acciones</th>
+    </thead>
+    <tbody>
+      {% for pending in cart %}
+        <tr>
+          <td>{{ pending.product_id.name }}</td>
+          <td>{{ pending.amount }}</td>
+          <td>
+            <form method="post" action="{% url 'productBuyConfirm' %}">
+              {% csrf_token %}
+              <input type="hidden" value="{{ pending.case_id }}" name="case_id" />
+              <button type="submit" class="btn btn-success">Confirmar</button>
+            </form>
+          </td>
+        <tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

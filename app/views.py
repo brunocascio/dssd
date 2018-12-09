@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from rest_framework import viewsets
-from app.models import Product, ProductType, Sale
+from app.models import Product, ProductType, Sale, Cart
 from app.serializers import ProductSerializer, ProductTypeSerializer, SaleSerializer
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
@@ -48,80 +48,96 @@ class SaleTypeViewSet(viewsets.ModelViewSet):
 @login_required
 def productsList(request):
   products = Product.objects.filter(stock__gt=0)
-  return render(request, 'products/index.html', {'products': products})
+  cart = Cart.objects.filter(user_id=request.user)
+  return render(request, 'products/index.html', {'products': products, 'cart': cart })
+
+@require_http_methods(["GET"])
+@login_required
+def cart(request):
+  cart = Cart.objects.filter(user_id=request.user)
+  return render(request, 'cart/index.html', {'cart': cart })
 
 @require_http_methods(["POST"])
 @login_required
 @csrf_protect
+@transaction.atomic
 def productBuy(request):
   product_id = int(request.POST.get('product_id'))
   session = requests.Session()
   try:
-    # Validates if product exists and has stock available
-    product = get_object_or_404(Product, stock__gt=0, pk=product_id)
+    with transaction.atomic():
+      # Validates if product exists and has stock available
+      product = get_object_or_404(Product, stock__gt=0, pk=product_id)
 
-    # Login into bonita
-    response = session.post(
-      'http://localhost:8080/bonita/loginservice', 
-      data = {'username':'walter.bates', 'password': 'bpm', 'redirect': False }, 
-      headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    )
-    # Search process by name
-    processId = session.get(
-      'http://localhost:8080/bonita/API/bpm/process?f=name=Proceso+de+compra',
-    ).json()[0].get('id')
+      # Login into bonita
+      response = session.post(
+        'http://localhost:8080/bonita/loginservice', 
+        data = {'username':'walter.bates', 'password': 'bpm', 'redirect': False }, 
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+      )
+      # Search process by name
+      processId = session.get(
+        'http://localhost:8080/bonita/API/bpm/process?f=name=Proceso+de+compra',
+      ).json()[0].get('id')
 
-    # Instantiate sale process (returns caseId)
-    caseId = session.post(
-      'http://localhost:8080/bonita/API/bpm/process/'+processId+'/instantiation',
-      data = json.dumps({
-        "var_product_id": product_id,
-        "var_cupon": request.POST.get('coupon'),
-        "var_email": request.user.get_username()
-      }),
-      headers = {'Content-Type': 'application/json', 'X-Bonita-API-Token': session.cookies.get_dict().get('X-Bonita-API-Token')}
-    ).json().get('caseId')
+      # Instantiate sale process (returns caseId)
+      caseId = session.post(
+        'http://localhost:8080/bonita/API/bpm/process/'+processId+'/instantiation',
+        data = json.dumps({
+          "var_product_id": product_id,
+          "var_cupon": request.POST.get('coupon'),
+          "var_email": request.user.get_username()
+        }),
+        headers = {'Content-Type': 'application/json', 'X-Bonita-API-Token': session.cookies.get_dict().get('X-Bonita-API-Token')}
+      ).json().get('caseId')
 
-    # polling requesting result variable
-    error = False
-    errorDescription = None
-    ready = False
-    caseInfo = None
+      # polling requesting result variable
+      error = False
+      errorDescription = None
+      ready = False
+      caseInfo = None
 
-    while not error and not ready:
-      caseInfo = session.get(
-        'http://localhost:8080/bonita/API/bpm/caseInfo/'+ str(caseId),
-      ).json()
-      for taskName, taskResultObj in caseInfo['flowNodeStatesCounters'].items():
-        if 'failed' in taskResultObj:
-          error = True
-          errorDescription = taskName + ' has errors'
-          break
-        if 'ready' in taskResultObj and taskName.lower() == 'confirmar venta':
-          ready = True
-          break
+      while not error and not ready:
+        caseInfo = session.get(
+          'http://localhost:8080/bonita/API/bpm/caseInfo/'+ str(caseId),
+        ).json()
+        for taskName, taskResultObj in caseInfo['flowNodeStatesCounters'].items():
+          if 'failed' in taskResultObj:
+            error = True
+            errorDescription = taskName + ' has errors'
+            break
+          if 'ready' in taskResultObj and taskName.lower() == 'confirmar venta':
+            ready = True
+            break
 
-    pprint(caseInfo)
+      pprint(caseInfo)
 
-    if error:
-      return render(request, 'products/error.html', {'error': errorDescription })
-    else:
-      variables = session.get(
-        'http://localhost:8080/bonita/API/bpm/caseVariable?f=case_id='+ str(caseId),
-      ).json()
-      
-      pprint(variables)
+      if error:
+        return render(request, 'products/error.html', {'error': errorDescription })
+      else:
+        variables = session.get(
+          'http://localhost:8080/bonita/API/bpm/caseVariable?f=case_id='+ str(caseId),
+        ).json()
+        
+        pprint(variables)
 
-      productResponse = {
-        'case_id': caseId,
-        'name': product.name
-      }
+        productResponse = {
+          'case_id': caseId,
+          'name': product.name
+        }
 
-      parseBonitaProduct(variables, productResponse)
+        parseBonitaProduct(variables, productResponse)
 
-      pprint(productResponse)
+        pprint(productResponse)
 
-      return render(request, 'products/confirm.html', {'product': productResponse})
+        Cart.objects.create(
+          user_id=request.user,
+          amount=productResponse['precio_venta'], 
+          product_id=product,
+          case_id=caseId
+        )
+
+        return render(request, 'products/confirm.html', {'product': productResponse})
   except Exception as e:
     return render(request, 'products/error.html', {'error': str(e) })
   
@@ -193,11 +209,12 @@ def productBuyConfirm(request):
         amount=productInstance['precio_venta'], 
         product_id=product
       )
+      Cart.objects.filter(case_id=caseId).delete()
 
     return render(request, 'products/sale-ok.html', { 'sale': sale })
 
   except CaseNotFoundException as e:
+    Cart.objects.filter(case_id=caseId).delete()
     return render(request, 'products/error.html', { 'error': str(e) })
   except Exception as e:
     raise e
-    # return render(request, 'products/error.html', { 'error': str(e) })
